@@ -250,7 +250,7 @@
 	- zip、mp4 占用资源
 	- HTML XSS
 - 后缀名Fuzz
-    - [AboutSecurity/Dic/Web/Upload/](./Dic/Web/Upload)
+    - [AboutSecurity/Dic/web/upload/](../Dic/web/upload)
     - web通用
         - htm
         - html

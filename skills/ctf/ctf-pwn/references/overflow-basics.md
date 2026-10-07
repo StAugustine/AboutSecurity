@@ -183,11 +183,11 @@ modify_grade(0, str(WIN))  # Writes win addr as int to GOT entry
 
 ## Signed Integer Bypass (Negative Quantity)
 
-`scanf("%d")` without sign check; negative input bypasses unsigned comparisons. See [advanced-exploits.md](advanced-exploits.md#signed-integer-bypass-negative-quantity) for full details.
+`scanf("%d")` without sign check; negative input bypasses unsigned comparisons. See [advanced-pwn.md](advanced-pwn.md#signed-integer-bypass-negative-quantity) for full details.
 
 ## Canary-Aware Partial Overflow
 
-Overflow `valid` flag between buffer and canary without touching the canary. Use `./` as no-op path padding for precise length control. See [advanced-exploits.md](advanced-exploits.md#canary-aware-partial-overflow) for full exploit chain.
+Overflow `valid` flag between buffer and canary without touching the canary. Use `./` as no-op path padding for precise length control. See [advanced-pwn.md](advanced-pwn.md#canary-aware-partial-overflow) for full exploit chain.
 
 ## OOB Read via Stride/Rate Leak (DiceCTF 2026)
 
@@ -306,7 +306,7 @@ p.sendline(payload)
 
 ## Global Buffer Overflow (CSV Injection)
 
-**Pattern (Spreadsheet):** Overflow adjacent global variables via extra CSV delimiters to change filename pointer. See [advanced.md](advanced.md) for full exploit pattern.
+**Pattern (Spreadsheet):** Overflow adjacent global variables via extra CSV delimiters to change filename pointer. See [advanced-pwn.md](advanced-pwn.md#global-buffer-overflow-csv-injection) for full exploit pattern.
 
 ---
 

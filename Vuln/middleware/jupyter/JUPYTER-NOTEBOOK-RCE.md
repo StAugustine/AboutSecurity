@@ -3,7 +3,7 @@ id: JUPYTER-NOTEBOOK-RCE
 title: Jupyter Notebook 未授权访问RCE漏洞
 product: jupyter
 vendor: Jupyter
-version_affected: "全版本"
+version_affected: "不适用（默认无密码，且旧版默认监听 0.0.0.0；取决于暴露面）"
 severity: CRITICAL
 tags: [rce, 无需认证]
 fingerprint: ["Jupyter", "Notebook"]
@@ -15,7 +15,7 @@ Jupyter Notebook 未配置密码时，攻击者可以直接访问 Web 界面创�
 
 ## 影响版本
 
-- Jupyter Notebook 全版本（未配置密码时）
+- 无版本边界：是否可利用取决于是否配置了密码/token 及服务暴露面。注意 Jupyter Notebook 5.3 之前默认监听 `0.0.0.0` 且无 token，暴露风险显著更高；较新版本默认仅监听 `127.0.0.1` 并生成 token。请针对目标实测确认，而非按版本筛选。
 
 ## 前置条件
 

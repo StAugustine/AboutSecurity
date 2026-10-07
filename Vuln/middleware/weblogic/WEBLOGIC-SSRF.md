@@ -3,7 +3,7 @@ id: WEBLOGIC-SSRF
 title: Weblogic UDDI Explorer SSRF漏洞
 product: weblogic
 vendor: Oracle
-version_affected: "全版本"
+version_affected: "10.0.2.0, 10.3.6.0（含 UDDI Explorer 的版本）"
 severity: HIGH
 tags: [ssrf, 无需认证]
 fingerprint: ["Oracle WebLogic", "WebLogic"]
@@ -15,7 +15,10 @@ Oracle WebLogic Server 在 UDDI Explorer 应用中存在一个服务器端请求
 
 ## 影响版本
 
-- Oracle WebLogic 全版本
+- Oracle WebLogic 10.0.2.0
+- Oracle WebLogic 10.3.6.0
+
+该 SSRF（CVE-2014-4210，`SearchPublicRegistries.jsp` 的 `operator` 参数）只存在于附带 UDDI Explorer 应用的版本；UDDI Explorer 在后续版本中已被移除，因此并非「全版本」。已修复版本参考 Oracle 2014 年 7 月 CPU。
 
 ## 前置条件
 

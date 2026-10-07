@@ -5,7 +5,7 @@ product: clickhouse
 vendor: ClickHouse Inc
 version_affected: "all versions (misconfiguration)"
 severity: HIGH
-tags: [sqli, info_disclosure, 无需认证]
+tags: [未授权访问, info_disclosure, 无需认证]
 fingerprint: ["ClickHouse", "Ok."]
 ---
 

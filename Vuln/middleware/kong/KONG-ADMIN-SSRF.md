@@ -3,7 +3,7 @@ id: KONG-ADMIN-SSRF
 title: "Kong - Admin API SSRF 代理攻击"
 product: kong
 vendor: Kong Inc
-version_affected: "全版本（需Admin API可访问）"
+version_affected: "不适用（取决于 Admin API 暴露面，非版本边界）"
 severity: CRITICAL
 tags: [ssrf, api_gateway, admin_api, proxy, cloud_metadata, 无需认证]
 fingerprint: ["Kong"]
@@ -15,7 +15,7 @@ fingerprint: ["Kong"]
 
 ## 影响版本
 
-- Kong全版本（前提是Admin API可访问）
+- 无版本边界：Kong 全版本在设计上均允许通过 Admin API 配置上游，是否可利用仅取决于 Admin API 的暴露面（默认 8001/8444 端口）。请针对目标实测确认 Admin API 是否可达，而非按版本筛选。
 
 ## 前置条件
 

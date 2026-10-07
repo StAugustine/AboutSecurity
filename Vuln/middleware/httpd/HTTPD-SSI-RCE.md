@@ -3,7 +3,7 @@ id: HTTPD-SSI-RCE
 title: Apache HTTP Server SSI 远程命令执行漏洞
 product: httpd
 vendor: Apache
-version_affected: "全版本"
+version_affected: "不适用（取决于 mod_include/mod_cgi 配置，非版本边界）"
 severity: CRITICAL
 tags: [rce, ssi, 无需认证]
 fingerprint: ["Apache", "httpd"]
@@ -15,7 +15,7 @@ Apache HTTP Server 开启了服务器端包含（SSI）和 CGI 功能时，攻�
 
 ## 影响版本
 
-- Apache HTTP Server 全版本
+- 无版本边界：这是配置问题而非版本漏洞。仅当启用 SSI（`mod_include`）与 CGI（`mod_cgi`）并允许上传 `.shtml` 时才成立，Apache HTTP Server 各版本均可能受影响。请针对目标实测确认，而非按版本筛选。
 
 ## 前置条件
 

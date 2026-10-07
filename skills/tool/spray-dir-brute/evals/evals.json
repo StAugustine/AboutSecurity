@@ -4,8 +4,8 @@
     {
       "id": 1,
       "name": "basic-dir-brute",
-      "prompt": "httpx 探活发现 http://10.0.0.5:8080 是 Tomcat 8.5，我想用 spray 对它做 PHP/JSP 后缀的目录爆破，字典用 /pentest/AboutSecurity/Dic/Web/Directory/Fuzz_common.txt，并发 50 线程",
-      "expected_output": "spray -u http://10.0.0.5:8080 -d /pentest/AboutSecurity/Dic/Web/Directory/Fuzz_common.txt --suffix .jsp,.php -t 50",
+      "prompt": "httpx 探活发现 http://10.0.0.5:8080 是 Tomcat 8.5，我想用 spray 对它做 PHP/JSP 后缀的目录爆破，字典用 /pentest/AboutSecurity/Dic/web/directory/common.txt，并发 50 线程",
+      "expected_output": "spray -u http://10.0.0.5:8080 -d /pentest/AboutSecurity/Dic/web/directory/common.txt --suffix .jsp,.php -t 50",
       "expectations": ["spray -u", "-d.*/pentest/", "--suffix.*\\.jsp"]
     },
     {

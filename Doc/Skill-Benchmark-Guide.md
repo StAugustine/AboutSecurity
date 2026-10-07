@@ -1,5 +1,20 @@
 # Skill 质量基准测试指南
 
+> [!IMPORTANT]
+> **本文档第一部分（触发率测试）与 `.github/skills/skill-creator/` 工具链仅供开发者内部使用。**
+>
+> 触发率测试所依赖的 `.github/skills/skill-creator/`（含 `run_eval.py`、`quick_validate.py`、
+> `package_skill.py`、`eval-viewer/` 等）以及测试产物目录 `benchmarks/` 均属于**开发专用**，
+> 已被 `.gitignore` 排除，**不在公开仓库中发布**。
+>
+> 因此：
+> - 通过 `git clone` 获取本仓库的外部读者，**无法**运行第一部分中的任何命令；
+> - 第二部分（内容质量测试）依赖的 `scripts/bench-skill.py`、`scripts/grade_eval.py`
+>   已随仓库发布，可以正常运行；
+> - 只有在**完整开发检出**（保留了 `.github/` 和 `benchmarks/`）的维护者，本文档的全部章节才适用。
+>
+> 本文档保留上述开发流程的描述，仅作为方法论记录，**不代表公开仓库的可用功能**。
+
 本项目提供两套互补的 Skill 测试工具：
 
 | 维度 | 工具 | 问题 | 位置 |
@@ -82,28 +97,28 @@ Claude Code 的 skill 触发机制：Agent 看到用户 query → 匹配 skill d
 ```bash
 # 基本用法
 python -m scripts.run_eval \
-  --eval-set Skills/exploit/sql-injection-methodology/trigger-eval.json \
-  --skill-path Skills/exploit/sql-injection-methodology \
+  --eval-set skills/exploit/web-method/sql-injection-methodology/trigger-eval.json \
+  --skill-path skills/exploit/web-method/sql-injection-methodology \
   --verbose
 
 # 每条 query 跑 3 次（减少随机性）
 python -m scripts.run_eval \
-  --eval-set Skills/exploit/sql-injection-methodology/trigger-eval.json \
-  --skill-path Skills/exploit/sql-injection-methodology \
+  --eval-set skills/exploit/web-method/sql-injection-methodology/trigger-eval.json \
+  --skill-path skills/exploit/web-method/sql-injection-methodology \
   --runs-per-query 3 \
   --verbose
 
 # 指定模型
 python -m scripts.run_eval \
-  --eval-set Skills/exploit/sql-injection-methodology/trigger-eval.json \
-  --skill-path Skills/exploit/sql-injection-methodology \
+  --eval-set skills/exploit/web-method/sql-injection-methodology/trigger-eval.json \
+  --skill-path skills/exploit/web-method/sql-injection-methodology \
   --model claude-sonnet-4-20250514 \
   --verbose
 
 # 测试一个新的 description（不修改 SKILL.md）
 python -m scripts.run_eval \
-  --eval-set Skills/exploit/sql-injection-methodology/trigger-eval.json \
-  --skill-path Skills/exploit/sql-injection-methodology \
+  --eval-set skills/exploit/web-method/sql-injection-methodology/trigger-eval.json \
+  --skill-path skills/exploit/web-method/sql-injection-methodology \
   --description "新的 description 文本" \
   --verbose
 ```
@@ -127,15 +142,15 @@ Results: 5/6 passed
 ```bash
 # 步骤 1：先跑一次 eval，保存结果
 python -m scripts.run_eval \
-  --eval-set Skills/exploit/sql-injection-methodology/trigger-eval.json \
-  --skill-path Skills/exploit/sql-injection-methodology \
+  --eval-set skills/exploit/web-method/sql-injection-methodology/trigger-eval.json \
+  --skill-path skills/exploit/web-method/sql-injection-methodology \
   --runs-per-query 3 \
   --verbose > eval_results.json
 
 # 步骤 2：基于结果自动生成改进版 description
 python -m scripts.improve_description \
   --eval-results eval_results.json \
-  --skill-path Skills/exploit/sql-injection-methodology \
+  --skill-path skills/exploit/web-method/sql-injection-methodology \
   --model claude-sonnet-4-20250514 \
   --verbose
 ```
@@ -146,8 +161,8 @@ python -m scripts.improve_description \
 
 ```bash
 python -m scripts.run_loop \
-  --eval-set Skills/exploit/sql-injection-methodology/trigger-eval.json \
-  --skill-path Skills/exploit/sql-injection-methodology \
+  --eval-set skills/exploit/web-method/sql-injection-methodology/trigger-eval.json \
+  --skill-path skills/exploit/web-method/sql-injection-methodology \
   --model claude-sonnet-4-20250514 \
   --max-iterations 5 \
   --runs-per-query 3 \
@@ -169,11 +184,11 @@ python -m scripts.run_loop \
 ```bash
 # 格式校验（检查 SKILL.md frontmatter 是否合法）
 python .github/skills/skill-creator/scripts/quick_validate.py \
-  Skills/exploit/sql-injection-methodology
+  skills/exploit/web-method/sql-injection-methodology
 
 # 打包 Skill 为 .skill 文件
 python .github/skills/skill-creator/scripts/package_skill.py \
-  Skills/exploit/sql-injection-methodology
+  skills/exploit/web-method/sql-injection-methodology
 ```
 
 ---
@@ -237,9 +252,9 @@ A/B 对比测试：
 
 **已有 evals 的 Skills（可直接测试）：**
 ```
-Skills/exploit/sql-injection-methodology/evals/evals.json  (4 evals)
-Skills/exploit/idor-methodology/evals/evals.json           (3 evals)
-Skills/exploit/ssti-detect/evals/evals.json                (3 evals)
+skills/exploit/web-method/sql-injection-methodology/evals/evals.json  (5 evals)
+skills/exploit/auth/idor-methodology/evals/evals.json                 (5 evals)
+skills/exploit/web-method/ssti-methodology/evals/evals.json           (6 evals)
 ```
 
 ### 2.3 运行内容质量测试
@@ -247,16 +262,16 @@ Skills/exploit/ssti-detect/evals/evals.json                (3 evals)
 ```bash
 # 测试单个 Skill（默认 1 次运行）
 python scripts/bench-skill.py \
-  --skill Skills/exploit/sql-injection-methodology
+  --skill skills/exploit/web-method/sql-injection-methodology
 
 # 多次运行（方差分析，推荐 3 次）
 python scripts/bench-skill.py \
-  --skill Skills/exploit/sql-injection-methodology \
+  --skill skills/exploit/web-method/sql-injection-methodology \
   --runs 3
 
 # 指定模型
 python scripts/bench-skill.py \
-  --skill Skills/exploit/sql-injection-methodology \
+  --skill skills/exploit/web-method/sql-injection-methodology \
   --model claude-sonnet-4-20250514
 
 # 测试所有有 evals 的 Skills
@@ -264,7 +279,7 @@ python scripts/bench-skill.py --all
 
 # 仅重新评分（不重新运行，用于调整 expectations 后）
 python scripts/bench-skill.py \
-  --skill Skills/exploit/sql-injection-methodology \
+  --skill skills/exploit/web-method/sql-injection-methodology \
   --grade-only
 ```
 
@@ -380,18 +395,18 @@ Step 5: 迭代改进
 
 ```bash
 # 1. 校验
-python .github/skills/skill-creator/scripts/quick_validate.py Skills/exploit/my-skill
+python .github/skills/skill-creator/scripts/quick_validate.py skills/exploit/my-skill
 
 # 2. 触发率测试
 cd .github/skills/skill-creator
 python -m scripts.run_eval \
-  --eval-set ../../../Skills/exploit/my-skill/trigger-eval.json \
-  --skill-path ../../../Skills/exploit/my-skill \
+  --eval-set ../../../skills/exploit/my-skill/trigger-eval.json \
+  --skill-path ../../../skills/exploit/my-skill \
   --runs-per-query 3 --verbose
 cd ../../..
 
 # 3. 内容质量 A/B
-python scripts/bench-skill.py --skill Skills/exploit/my-skill --runs 3
+python scripts/bench-skill.py --skill skills/exploit/my-skill --runs 3
 
 # 4. LLM 精确评分
 python scripts/grade_eval.py --workspace benchmarks/my-skill/iteration-xxx

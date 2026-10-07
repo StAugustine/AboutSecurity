@@ -3,7 +3,7 @@ id: ECSHOP-SQLi-RCE
 title: ECShop 2.x/3.x SQL注入导致任意代码执行漏洞
 product: ecshop
 vendor: ECShop
-version_affected: "ECShop 2.x (全版本), ECShop 3.x (< 3.6.0)"
+version_affected: "ECShop 2.x (<= 2.7.3), ECShop 3.x (< 3.6.0)"
 severity: CRITICAL
 tags: [rce, sqli, code_injection, 无需认证, 国产]
 fingerprint: ["ECShop", "ecshop", "Powered by ECShop"]

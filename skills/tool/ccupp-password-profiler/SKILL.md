@@ -15,13 +15,13 @@ ccupp（Chinese Common User Passwords Profiler）根据目标的个人信息智�
 ## 安装
 
 ```bash
-# 方式 1: f8x 自动安装（推荐）
-f8x -install ccupp
-
-# 方式 2: 手动安装（ccupp 未发布到 PyPI，需 clone 后本地安装）
+# 方式 1: 手动安装（ccupp 未发布到 PyPI，需 clone 后本地安装）
 git clone https://github.com/WangYihang/ccupp.git
 cd ccupp
 pipx install .
+
+# 方式 2: 若团队内已分发 f8x CLI（WgpSec 内部工具集，随内网环境提供，本仓库不含其源码与安装方式），
+# 可用它一键安装：f8x -install ccupp
 ```
 
 ## 快速开始

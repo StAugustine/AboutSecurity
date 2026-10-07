@@ -3,7 +3,7 @@ id: SCRAPY-SCRAPYD-UNACC
 title: scrapyd 未授权访问导致远程代码执行漏洞
 product: scrapy
 vendor: scrapy
-version_affected: "全版本"
+version_affected: "不适用（默认无认证，取决于 6800 端口暴露面）"
 severity: CRITICAL
 tags: [rce, 无需认证]
 fingerprint: ["scrapyd", "Scrapy"]
@@ -15,7 +15,7 @@ scrapyd是爬虫框架scrapy提供的云服务，用户可以部署自己的scra
 
 ## 影响版本
 
-- 全版本
+- 无版本边界：scrapyd 各版本默认不启用认证，是否可利用取决于 6800 端口是否暴露。请针对目标实测确认，而非按版本筛选。
 
 ## 前置条件
 

@@ -42,7 +42,7 @@ skills/<category>/<skill-name>/SKILL.md    # 维护者视角：按攻击阶段�
 .claude/skills/<skill-name>/SKILL.md       # Agent 视角：所有 skill 平铺
 ```
 
-通过 `sync-skills.sh` 脚本将三级路径软链接/复制为二级路径。这意味着：
+通过 `scripts/sync-claude-skills.sh` 脚本将三级路径软链接/复制为二级路径。这意味着：
 - **维护者**按分类组织，便于管理和查找
 - **Agent** 使用时所有 skill 在同一层级，不存在"跨分类跳转"问题
 - 脚本支持多源合并（如私有仓库 + 本仓库），先到先得
@@ -53,7 +53,7 @@ skills/<category>/<skill-name>/SKILL.md    # 维护者视角：按攻击阶段�
 
 1. **多用途工具避免重复**：nuclei 可用于指纹扫描、漏洞扫描、DAST、本地文件扫描，若在每个引用它的 skill 中重复写使用方法，维护成本极高
 2. **模型不了解新工具**：AI 模型训练数据有截止日期，对新版本工具的参数和用法不了解，需要专门的 skill 文档补充
-3. **运行时无影响**：sync-skills.sh 将 tool/ 下的 skill 和其他分类一起扁平化，Agent 在使用时按 description 匹配触发，不感知分类层级
+3. **运行时无影响**：`scripts/sync-claude-skills.sh` 将 tool/ 下的 skill 和其他分类一起扁平化，Agent 在使用时按 description 匹配触发，不感知分类层级
 
 ---
 

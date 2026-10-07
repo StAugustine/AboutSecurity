@@ -262,4 +262,4 @@ SELECT * FROM auth_user;
 SELECT * FROM django_session;
 ```
 
-获取到新凭据后，回到 `database-exploit` 技能利用它们连接新目标。
+获取到新凭据后，回到 `database-tactics` 技能利用它们连接新目标。

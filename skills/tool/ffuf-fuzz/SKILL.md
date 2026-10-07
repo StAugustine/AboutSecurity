@@ -37,7 +37,7 @@ ffuf -u http://target/FUZZ -w /usr/share/seclists/Discovery/Web-Content/director
 | 深度扫描 | `Discovery/Web-Content/directory-list-2.3-medium.txt` (220k) |
 | 备份文件 | `Discovery/Web-Content/common-and-backup.txt` |
 | API 路径 | `Discovery/Web-Content/api/api-endpoints.txt` |
-| CTF 常见 | `/pentest/AboutSecurity/Dic/Web/CTF/` |
+| CTF 常见 | `/pentest/AboutSecurity/Dic/web/ctf/` |
 
 ---
 
@@ -68,7 +68,7 @@ ffuf -u 'http://target/api' -X POST \
     -fs 4242
 ```
 
-**CTF 专用参数字典**：`/pentest/AboutSecurity/Dic/Web/CTF/Fuzz_param.txt`
+**CTF 专用参数字典**：`/pentest/AboutSecurity/Dic/web/ctf/param.txt`
 
 ---
 
@@ -189,7 +189,7 @@ ffuf 默认显示所有响应，需要过滤噪音：
 | 快速目录扫描 | `ffuf -u URL/FUZZ -w common.txt -mc 200,301,302` |
 | 扫 PHP 文件 | `ffuf -u URL/FUZZ -w common.txt -e .php -mc 200` |
 | 找隐藏参数 | `ffuf -u 'URL?FUZZ=1' -w burp-parameter-names.txt -fs SIZE` |
-| LFI 参数 Fuzz | `ffuf -u 'URL?FUZZ=../../../etc/passwd' -w Fuzz_param.txt -mr 'root:'` |
+| LFI 参数 Fuzz | `ffuf -u 'URL?FUZZ=../../../etc/passwd' -w param.txt -mr 'root:'` |
 | 子域名枚举 | `ffuf -u URL -H 'Host: FUZZ.target' -w subdomains.txt -fs SIZE` |
 | 暴力登录 | `ffuf -u URL -X POST -d 'user=admin&pass=FUZZ' -w passwords.txt -fc 401` |
 | API 端点发现 | `ffuf -u URL/api/FUZZ -w api-endpoints.txt -mc 200,401,403` |

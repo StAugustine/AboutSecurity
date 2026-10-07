@@ -3,7 +3,7 @@ id: KIBANA-RCE
 title: Kibana 远程代码执行与SSRF漏洞
 product: kibana
 vendor: Elastic
-version_affected: "< 7.6.3, < 6.8.9"
+version_affected: "CVE-2019-7609: < 6.6.1; CVE-2018-17246: < 6.4.3, < 5.6.13"
 severity: CRITICAL
 tags: [rce, ssrf, prototype_pollution, elk, 日志分析, 无需认证]
 fingerprint: ["Kibana", "kibana", "/app/kibana", "/api/status", "kbn-xsrf", "kbn-version"]

@@ -3,7 +3,7 @@ name: sliver-c2
 description: "Sliver C2 框架操作指南。当需要建立命令与控制通道、管理植入体、进行后渗透操作时使用。支持 mTLS/HTTPS/DNS/WireGuard 多协议、Session/Beacon 双模式、SOCKS5 代理、TCP/Named Pipe 多层穿透。适用于红队行动和渗透测试场景。"
 metadata:
   tags: "sliver,c2,command-and-control,implant,beacon,session,mtls,socks5,pivoting,named-pipe,post-exploitation,bof"
-  category: "evasion"
+  category: "tool"
 ---
 
 # Sliver C2 框架操作指南

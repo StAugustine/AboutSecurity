@@ -1,7 +1,5 @@
 # Loader 架构参考
 
-> 提取自 Evasion-SubAgents/loader_generate.md，供 [references/loader-architecture.md](references/loader-architecture.md) 引用。
-
 ## 组件模型
 
 ```

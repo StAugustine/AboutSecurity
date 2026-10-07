@@ -140,4 +140,4 @@ curl -sk https://<svc>:<port>/
 |------|------|------|
 | K8Spider | K8s DNS 批量扫描（PTR+SRV+AXFR+多线程） | `go install github.com/Esonhugh/k8spider@latest` |
 | nslookup/dig | 手动 DNS 查询 | 系统自带 |
-| CDK | 容器渗透工具集（含服务发现） | f8x 安装 |
+| CDK | 容器渗透工具集（含服务发现） | 从项目 Release 自行下载；内网环境亦可由 f8x CLI 安装（内部工具，本仓库不含） |

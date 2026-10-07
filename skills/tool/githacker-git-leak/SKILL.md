@@ -16,8 +16,8 @@ GitHacker 专注于 .git 目录泄露的**完整恢复**——不仅拿到源码
 
 ```bash
 pip install GitHacker
-# 或
-f8x -install githacker
+# 或（若团队内已分发 f8x CLI——WgpSec 内部工具集，本仓库不含其源码与安装方式）：
+# f8x -install githacker
 ```
 
 ## 基本用法

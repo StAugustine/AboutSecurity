@@ -129,7 +129,7 @@ Agent 视角:  .claude/skills/sql-injection-methodology/SKILL.md  (软链接)
 
 1. **多用途工具避免重复**：如 nuclei 可用于指纹扫描、漏洞扫描、DAST、本地文件扫描。若在每个引用 nuclei 的 skill 中重复写使用方法，维护成本极高
 2. **模型知识截止**：AI 模型对新版本工具的参数不了解，需要专门的 skill 文档补充最新用法
-3. **运行时透明**：sync-skills.sh 将 tool/ 和其他分类一起扁平化，Agent 不感知分类层级
+3. **运行时透明**：sync-claude-skills.sh 将 tool/ 和其他分类一起扁平化，Agent 不感知分类层级
 
 ### exploit/ 子分类说明
 

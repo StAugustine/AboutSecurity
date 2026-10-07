@@ -3,7 +3,7 @@ id: SPARK-UNACC
 title: Apache Spark 未授权访问导致远程代码执行漏洞
 product: spark
 vendor: Apache
-version_affected: "全版本"
+version_affected: "不适用（默认未启用 ACL，取决于 Master/REST 暴露面）"
 severity: CRITICAL
 tags: [rce, 无需认证]
 fingerprint: ["Apache Spark", "Spark"]
@@ -15,7 +15,7 @@ Apache Spark 是一款集群计算系统，其支持用户向管理节点提交�
 
 ## 影响版本
 
-- 全版本（未启用 ACL 时）
+- 无版本边界：Apache Spark 各版本默认均未启用 ACL（`spark.acls.enable`），是否可利用取决于 Master Web UI / REST 接口（默认 8080/7077）是否暴露。请针对目标实测确认，而非按版本筛选。
 
 ## 前置条件
 

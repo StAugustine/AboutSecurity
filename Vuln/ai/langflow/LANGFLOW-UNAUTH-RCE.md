@@ -5,7 +5,7 @@ product: langflow
 vendor: langflow-ai
 version_affected: "<= 1.7.3"
 severity: CRITICAL
-tags: [rce, file_write, path_traversal, ssrf, ai, llm, 无需认证]
+tags: [rce, file_write, path_traversal, ai, llm, 部分路径无需认证, 部分路径需认证]
 fingerprint: ["langflow", "/api/v1/", "build_public_tmp", "/api/v2/files/", "langflow-ai", "/api/v1/validate/code"]
 ---
 
@@ -30,8 +30,12 @@ Langflow 是开源 LLM 应用构建平台。存在多个严重漏洞:
 
 - 目标 Langflow 服务端口（默认7860）可从网络访问
 - CVE-2025-3248: 仅需网络访问，无需认证
-- CVE-2026-33017: 需知道 public flow UUID（当 AUTO_LOGIN=true 时可自动创建）
+- CVE-2026-33017: 需知道 public flow UUID（当 AUTO_LOGIN=true 时可自动创建），利用阶段本身不需要认证头
 - CVE-2026-33309: 需认证用户（可通过 AUTO_LOGIN 获取 token）
+- CVE-2026-27966: 需能创建含 CSV Agent 的流程
+- CVE-2025-34291: 需受害者已登录并访问攻击者页面
+
+> 本条目聚合了多个认证要求不同的漏洞：CVE-2025-3248 / CVE-2026-33017 为未认证路径，CVE-2026-33309 / CVE-2026-27966 需要认证（AUTO_LOGIN 开启时可自动获取 token）。请按具体 CVE 判定认证前提，不要整体视为「无需认证」。
 
 ## 利用步骤
 

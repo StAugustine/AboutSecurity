@@ -109,6 +109,6 @@ kubectl auth can-i --list
 
 | 工具 | 用途 | 安装 / 路径 |
 |------|------|-------------|
-| ingressnightmare | CVE-2025-1974 一体化 PoC（Go 编译，多平台） | `f8x -cloud` 安装到 PATH；arsenal 投递物在 `/pentest/arsenal/ingressnightmare/` |
-| kubectl | K8s 集群管理 | `f8x -cloud` |
+| ingressnightmare | CVE-2025-1974 一体化 PoC（Go 编译，多平台） | 从项目 Release 自行下载；若团队内已分发 f8x CLI，可 `f8x -cloud` 安装到 PATH（内部工具，本仓库不含其源码与安装方式） |
+| kubectl | K8s 集群管理 | 同上，或按官方文档安装 kubectl |
 | nmap | 端口探测 | `apt install nmap` |

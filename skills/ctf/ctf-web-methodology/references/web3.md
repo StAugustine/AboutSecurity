@@ -117,7 +117,8 @@ Offset `0x20` serves dual purpose: offset pointer AND bytes length.
 ## Complete Exploit Flow (House of Illusions)
 
 ```bash
-export PATH="$PATH:/Users/lcf/.foundry/bin"
+# foundry 未安装时：curl -L https://foundry.paradigm.xyz | bash && foundryup
+export PATH="$PATH:$HOME/.foundry/bin"
 RPC="https://ethereum-sepolia-rpc.publicnode.com"
 
 forge create src/IllusionHouse.sol:IllusionHouse --private-key $KEY --rpc-url $RPC --broadcast

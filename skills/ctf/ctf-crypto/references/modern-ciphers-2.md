@@ -69,7 +69,7 @@ new_hash, new_data = hashpumpy.hashpump(
 
 **Key insight:** Merkle-Damgard hashes (MD5, SHA-1, SHA-256) process data in blocks, and the hash output IS the internal state. Given `H(secret || msg)`, you can compute `H(secret || msg || padding || extension)` without knowing `secret` — just initialize the hash state from the known output and continue hashing. Only HMAC (`H(K XOR opad || H(K XOR ipad || msg))`) is immune. If the secret length is unknown, try lengths 1-32.
 
-*See also [ctf-web/auth-infra.md — Hash Length Extension Attack (ASIS CTF 2017)](../ctf-web/auth-infra.md#hash-length-extension-attack-asis-ctf-2017) for the same primitive applied to a web auth token bypass.*
+*See also [ctf-web-methodology/references/auth-infra.md](../../ctf-web-methodology/references/auth-infra.md) for the same primitive applied to a web auth token bypass.*
 
 ---
 

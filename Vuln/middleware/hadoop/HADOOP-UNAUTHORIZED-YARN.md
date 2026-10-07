@@ -3,7 +3,7 @@ id: HADOOP-UNAUTHORIZED-YARN
 title: Hadoop YARN ResourceManager 未授权RCE漏洞
 product: hadoop
 vendor: Apache
-version_affected: "全版本"
+version_affected: "不适用（默认未启用 ACL，取决于 ResourceManager 暴露面）"
 severity: CRITICAL
 tags: [rce, 无需认证]
 fingerprint: ["Hadoop", "YARN", "ResourceManager"]
@@ -15,7 +15,7 @@ Hadoop YARN ResourceManager 存在未授权访问漏洞。未经授权的用户�
 
 ## 影响版本
 
-- Hadoop 全版本
+- 无版本边界：Hadoop YARN 各版本默认均未启用 ACL，是否可利用取决于 ResourceManager（默认 8088 端口）是否暴露。请针对目标实测确认，而非按版本筛选。
 
 ## 前置条件
 

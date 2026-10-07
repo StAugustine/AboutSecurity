@@ -46,13 +46,13 @@ Penetration testing knowledge base with security methodologies in AI Agent-execu
 
 **Payload/** — Attack payloads (lowercase hyphen-separated naming, each directory has `_meta.yaml` metadata)
 
-- `sqli/`, `xss/`, `ssrf/`, `xxe/`, `lfi/`, `rce/`, `upload/`, `cors/`, `hpp/`, `format/`, `ssi/`, `email/`, `access-bypass/`, `prompt-injection/`
+- `sqli/`, `xss/`, `ssrf/`, `xxe/`, `lfi/`, `rce/`, `upload/`, `cors/`, `hpp/`, `format/`, `ssi/`, `email/`, `access-bypass/`, `prompt-injection/`, `reverse-shell/`
 
 **Vuln/** — 600+ vulnerability entries, structured vulnerability data organized by product
 
 - `ai/` — AI-related (ComfyUI, Dify, LangFlow, AnythingLLM, etc.)
 - `cloud/` — Cloud platforms (AWS API Gateway, etc.)
-- `middleware/` — Middleware (ActiveMQ, Nacos, Grafana, Jenkins, RocketMQ, etc. — 394 entries)
+- `middleware/` — Middleware (ActiveMQ, Nacos, Grafana, Jenkins, RocketMQ, etc. — 437 entries)
 - `network/` — Network devices (routers, switches, etc.)
 - `web/` — Web applications (1Panel, WordPress, OFBiz, etc.)
 

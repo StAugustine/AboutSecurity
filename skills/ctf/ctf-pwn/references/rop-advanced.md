@@ -110,7 +110,7 @@ Alternative syscalls when seccomp blocks `open()`/`read()`:
 
 **Check rules:** `seccomp-tools dump ./binary`
 
-See [advanced.md](advanced.md) for: conditional buffer address restrictions, shellcode construction without relocations (call/pop trick), seccomp analysis from disassembly, `scmp_arg_cmp` struct layout.
+seccomp 规则表与 BPF 程序结构分析（条件缓冲区地址限制、`scmp_arg_cmp` 结构布局）见 [heap-exploitation.md](heap-exploitation.md#seccomp-rules-and-bypass)。
 
 ## RETF Architecture Switch for Seccomp Bypass (Midnightflag 2026)
 

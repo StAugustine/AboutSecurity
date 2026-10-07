@@ -3,7 +3,7 @@ id: UWSGI-UNACC
 title: uWSGI 未授权访问漏洞
 product: uwsgi
 vendor: uWSGI
-version_affected: "全版本"
+version_affected: "不适用（默认未启用协议认证，取决于 socket 暴露面）"
 severity: HIGH
 tags: [rce, 无需认证]
 fingerprint: ["uWSGI", "uwsgi"]
@@ -15,7 +15,7 @@ uWSGI 支持通过魔术变量（Magic Variables）的方式动态配置后端 W
 
 ## 影响版本
 
-- 全版本（未配置认证时）
+- 无版本边界：uWSGI 各版本默认未启用协议级认证，是否可利用取决于 uwsgi 协议端口/socket 是否暴露。请针对目标实测确认，而非按版本筛选。
 
 ## 前置条件
 

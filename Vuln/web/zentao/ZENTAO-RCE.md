@@ -5,7 +5,7 @@ product: zentao
 vendor: 青岛易软天创
 version_affected: "v16.x, v17.x, v18.x"
 severity: CRITICAL
-tags: [rce, auth_bypass, 国产, 无需认证]
+tags: [rce, auth_bypass, 国产, 部分路径无需认证, 部分路径需管理员认证]
 fingerprint: ["禅道", "ZenTao", "zentao", "/zentao/", "zentaopms"]
 ---
 

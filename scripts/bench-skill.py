@@ -7,22 +7,22 @@ using `claude -p` or any compatible CLI agent as the executor.
 
 Usage:
     # Benchmark a single skill
-    python scripts/bench-skill.py --skill Skills/exploit/sql-injection-methodology
+    python scripts/bench-skill.py --skill skills/exploit/web-method/sql-injection-methodology
 
     # Benchmark with 3 runs per config (for variance analysis)
-    python scripts/bench-skill.py --skill Skills/exploit/sql-injection-methodology --runs 3
+    python scripts/bench-skill.py --skill skills/exploit/web-method/sql-injection-methodology --runs 3
 
     # Use a specific model
-    python scripts/bench-skill.py --skill Skills/exploit/idor-methodology --model claude-sonnet-4-20250514
+    python scripts/bench-skill.py --skill skills/exploit/auth/idor-methodology --model claude-sonnet-4-20250514
 
     # Benchmark all skills that have evals
     python scripts/bench-skill.py --all
 
     # Grade only (skip running, just grade existing outputs)
-    python scripts/bench-skill.py --skill Skills/exploit/sql-injection-methodology --grade-only
+    python scripts/bench-skill.py --skill skills/exploit/web-method/sql-injection-methodology --grade-only
 
     # Custom executor (instead of claude -p)
-    python scripts/bench-skill.py --skill Skills/exploit/ssti-detect --executor "kitsune agent"
+    python scripts/bench-skill.py --skill skills/exploit/web-method/ssti-methodology --executor "kitsune agent"
 
 Output:
     Creates workspace at benchmarks/<skill-name>/<timestamp>/
@@ -43,7 +43,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SKILLS_DIR = REPO_ROOT / "Skills"
+SKILLS_DIR = REPO_ROOT / "skills"
 
 
 def parse_skill_md(skill_path: Path) -> tuple[str, str, str]:
@@ -589,7 +589,7 @@ def main():
     else:
         parser.print_help()
         print("\nExamples:")
-        print("  python scripts/bench-skill.py --skill Skills/exploit/sql-injection-methodology")
+        print("  python scripts/bench-skill.py --skill skills/exploit/web-method/sql-injection-methodology")
         print("  python scripts/bench-skill.py --all --runs 3")
         sys.exit(1)
 
