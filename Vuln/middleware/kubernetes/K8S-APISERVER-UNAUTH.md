@@ -113,17 +113,19 @@ curl -sk https://target:6443/api/v1/namespaces
 ## 验证方法
 
 ```bash
-# 验证8080非安全端口
-curl -s -o /dev/null -w "%{http_code}" http://target:8080/api/v1/namespaces
-# 返回200表示非安全端口开放
+# 8080 非安全端口：看响应体是不是 NamespaceList
+curl -s http://target:8080/api/v1/namespaces | head -c 400
+# 判据：响应体是 NamespaceList JSON，出现 "kind":"NamespaceList" 与 items[].metadata.name（default、kube-system 等真实命名空间名）
+# 反例：响应体是 "kind":"Status" 的 403/401 JSON（Forbidden / Unauthorized），或登录页 HTML，都算需认证
 
-# 验证6443匿名访问
-curl -sk -o /dev/null -w "%{http_code}" https://target:6443/api/v1/namespaces
-# 返回200表示允许匿名访问，403表示需要认证
+# 6443 匿名访问同理，看响应体
+curl -sk https://target:6443/api/v1/namespaces | head -c 400
+# 判据：同上，出现 "kind":"NamespaceList" 与 items[].metadata.name
 
-# 获取版本信息确认K8s
-curl -s http://target:8080/version
-curl -sk https://target:6443/version
+# Pod 列表：看响应体是不是 PodList
+curl -s http://target:8080/api/v1/pods | head -c 400
+# 判据：响应体是 PodList JSON，出现 "kind":"PodList" 与 items[].metadata.name、items[].spec.containers
+# 说明：能拿到资源对象本体才算未授权；/version 只能说明是 K8s，见下方指纹确认
 ```
 
 ## 指纹确认

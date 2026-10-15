@@ -1,6 +1,6 @@
 ---
-id: CVE-2025-55182
-title: "Dify - React Server Components Deserialization RCE"
+id: DIFY-RSC-DESER-RCE
+title: "Dify 控制台 React Server Components 反序列化 RCE（CVE-2025-55182）"
 product: dify
 vendor: LangGenius
 version_affected: "React Server Components 19.0.0 ~ 19.2.0 (Next.js affected versions per GHSA-9qr9-h5gf-34mp)"

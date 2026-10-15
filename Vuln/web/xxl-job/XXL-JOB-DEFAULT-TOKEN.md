@@ -98,15 +98,26 @@ curl -s "http://target:9999/run" \
 
 ## 验证方法
 
+默认 Token 是否生效，判据是 executor 真的受理了任务并回送成功响应，而不是「请求返回 200」。executor 的 `/run` 成功形态是 `ReturnT` 结构里 `code=200`、`msg=null`；Token 错误时 `code=500`、`msg` 为 `The access token is wrong`。
+
 ```bash
-# 不带 Token 发送请求，返回 500 + "The access token is wrong"
-# 带默认 Token 发送请求，返回 200 即表明使用了默认 Token
+# 1. 先确认不带/带错误 Token 时的失败形态（对照组）
+curl -s "http://target:9999/run" \
+  -H "Content-Type: application/json" \
+  -d '{"jobId":1,"executorHandler":"demoJobHandler","executorParams":"","executorBlockStrategy":"COVER_EARLY","executorTimeout":0,"logId":1,"logDateTime":1586629003729,"glueType":"GLUE_SHELL","glueSource":"#!/bin/bash\necho POC_TOKEN","glueUpdatetime":1586699003758,"broadcastIndex":0,"broadcastTotal":0}'
+# 期望：code=500，msg=The access token is wrong
+
+# 2. 带文档默认 Token 重发同一请求
 curl -s "http://target:9999/run" \
   -H "Content-Type: application/json" \
   -H "XXL-JOB-ACCESS-TOKEN: default_token" \
-  -d '{"jobId":1,"executorHandler":"demoJobHandler","executorParams":"","executorBlockStrategy":"COVER_EARLY","executorTimeout":0,"logId":1,"logDateTime":1586629003729,"glueType":"GLUE_SHELL","glueSource":"#!/bin/bash\necho test","glueUpdatetime":1586699003758,"broadcastIndex":0,"broadcastTotal":0}' \
-  -o /dev/null -w "%{http_code}"
+  -d '{"jobId":1,"executorHandler":"demoJobHandler","executorParams":"","executorBlockStrategy":"COVER_EARLY","executorTimeout":0,"logId":1,"logDateTime":1586629003729,"glueType":"GLUE_SHELL","glueSource":"#!/bin/bash\necho POC_TOKEN","glueUpdatetime":1586699003758,"broadcastIndex":0,"broadcastTotal":0}'
+# 期望：code=200，msg=null（任务被受理）
 ```
+
+判据：同一请求带 `default_token` 后返回 `{"code":200,...,"msg":null}`，去掉该头则返回 `code:500` 加 `The access token is wrong`——两者对照才成立默认凭据被接受。任务日志里出现本次 glue 脚本的输出 `POC_TOKEN` 是更强的证据（`/log` 接口按 `logId` 取回）。
+
+反例：接口返回 200 或任意 JSON，但 `code` 仍是 500、`msg` 仍是 token 错误 —— 只是请求到达了 executor，默认凭据不成立。登录后台口令同理，以接口返回 token/Set-Cookie 或跳转后台为准，不写「页面 200」。
 
 ## 指纹确认
 

