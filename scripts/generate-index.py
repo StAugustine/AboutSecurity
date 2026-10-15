@@ -37,6 +37,7 @@ def parse_frontmatter(content: str) -> dict:
     current_key = None
     current_value = ""
     in_metadata = False
+    pending_sub_key = None
 
     for line in frontmatter.split("\n"):
         # 顶级字段
@@ -50,11 +51,19 @@ def parse_frontmatter(content: str) -> dict:
             in_metadata = (current_key == "metadata")
             if in_metadata:
                 result["metadata"] = {}
-        # metadata 子字段（缩进两空格）
-        elif in_metadata and re.match(r'^\s+\w+:', line):
-            sub_match = re.match(r'^\s+(\w[\w_]+):\s*(.*)$', line)
+                pending_sub_key = None
+        # metadata 子字段（缩进），值可以是标量、行内列表，或后续的块状列表项
+        elif in_metadata and re.match(r'^\s+\w[\w_]*:', line):
+            sub_match = re.match(r'^\s+(\w[\w_]*):\s*(.*)$', line)
             if sub_match:
-                result["metadata"][sub_match.group(1)] = sub_match.group(2).strip().strip('"')
+                key, value = sub_match.group(1), sub_match.group(2).strip()
+                result["metadata"][key] = _parse_scalar(value)
+                pending_sub_key = key if value == "" else None
+        # 块状列表项，续在 key: 之后
+        elif in_metadata and pending_sub_key and re.match(r'^\s+-\s', line):
+            item = _parse_scalar(re.sub(r'^\s+-\s*', '', line))
+            current = result["metadata"][pending_sub_key]
+            result["metadata"][pending_sub_key] = current + [item]
         elif current_key and current_key != "metadata" and line.startswith("  "):
             current_value += " " + line.strip()
 
@@ -62,6 +71,31 @@ def parse_frontmatter(content: str) -> dict:
         result[current_key] = current_value.strip().strip('"')
 
     return result
+
+
+def _parse_scalar(value: str):
+    """把 YAML 标量还原成字面值（剥引号），"" 变成空列表以待块状列表项续接。
+
+    行内列表 [a, b] 拆成 ["a", "b"]；引用型字符串（含逗号、方括号）整体保留。
+    """
+    text = str(value).strip()
+    if text == "":
+        return []
+    if text[0] in "\"'" and len(text) >= 2 and text[-1] == text[0]:
+        return text[1:-1]
+    if text.startswith("[") and text.endswith("]"):
+        inner = text[1:-1].strip()
+        if not inner:
+            return []
+        return [_parse_scalar(x) for x in inner.split(",")]
+    return text
+
+
+def split_tag_list(value) -> list:
+    """归一化标签字段：YAML 列表和逗号分隔字符串都接受。"""
+    if isinstance(value, list):
+        return [str(t).strip() for t in value if str(t).strip()]
+    return [t.strip() for t in str(value).split(",") if t.strip()]
 
 
 def extract_skill_info(skill_path: Path) -> dict:
@@ -98,9 +132,9 @@ def extract_skill_info(skill_path: Path) -> dict:
     metadata = frontmatter.get("metadata", {})
     if isinstance(metadata, dict):
         if "tags" in metadata:
-            info["tags"] = [t.strip() for t in metadata["tags"].split(",")]
+            info["tags"] = split_tag_list(metadata["tags"])
         if "mitre_attack" in metadata:
-            info["mitre_attack"] = [t.strip() for t in metadata["mitre_attack"].split(",")]
+            info["mitre_attack"] = split_tag_list(metadata["mitre_attack"])
 
     return info
 
