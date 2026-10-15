@@ -355,12 +355,23 @@ aws sts get-caller-identity
 # 查看用户附加的策略
 aws iam list-attached-user-policies --user-name <user>
 aws iam list-user-policies --user-name <user>
+aws iam get-user-policy --user-name <user> --policy-name <policy>
 
-# 查看用户所属的组
+# 查看用户所属的组，并沿组这一层继续查（最容易漏：用户无权限、组有）
 aws iam list-groups-for-user --user-name <user>
+aws iam list-attached-group-policies --group-name <group>
+aws iam list-group-policies --group-name <group>
+aws iam get-group-policy --group-name <group> --policy-name <policy>
 
 # 如果是角色，查看角色策略
 aws iam list-attached-role-policies --role-name <role>
+aws iam list-role-policies --role-name <role>
+aws iam get-role-policy --role-name <role> --policy-name <policy>
+
+# 内联策略只会在这里露出正文，托管策略要再取版本
+aws iam list-policies --scope Local
+aws iam get-policy --policy-arn <arn>
+aws iam get-policy-version --policy-arn <arn> --version-id <DefaultVersionId>
 ```
 
 **第二步：自动化扫描**

